@@ -10,21 +10,41 @@ const CELL_SIZE = 30; // cell size in pixels
 // Create an empty grid
 const createGrid = () => Array.from({ length: ROWS }, () => Array(COLS).fill(0));
 
-// Tetris shapes
+// Tetris shapes with additional shapes
 const SHAPES = [
-  // I
   [[1, 1, 1, 1]],
-  // O
+
   [
     [1, 1],
     [1, 1],
   ],
-  // T
+
   [
     [0, 1, 0],
     [1, 1, 1],
   ],
-  // Other shapes can be added here
+
+  [
+    [0, 1, 1],
+    [1, 1, 0],
+  ],
+
+  [
+    [1, 1, 0],
+    [0, 1, 1],
+  ],
+
+  [
+    [1, 0],
+    [1, 0],
+    [1, 1],
+  ],
+
+  [
+    [0, 1],
+    [0, 1],
+    [1, 1],
+  ],
 ];
 
 // Random shape selector
@@ -55,15 +75,35 @@ const Index = () => {
   // Handle key events
   useEffect(() => {
     const handleKeyDown = (event) => {
-      if (event.key === "ArrowLeft") {
-        setPosition((prev) => ({ ...prev, x: prev.x - 1 }));
-      } else if (event.key === "ArrowRight") {
-        setPosition((prev) => ({ ...prev, x: prev.x + 1 }));
-      } else if (event.key === "ArrowDown") {
-        setPosition((prev) => ({ ...prev, y: prev.y + 1 }));
-      } else if (event.key === "ArrowUp") {
-        // Rotate the shape
+      let newX = position.x;
+      let newY = position.y;
+      switch (event.key) {
+        case "ArrowLeft":
+          newX = Math.max(position.x - 1, 0);
+          break;
+        case "ArrowRight":
+          newX = Math.min(position.x + 1, COLS - activeShape[0].length);
+          break;
+        case "ArrowDown":
+          newY = Math.min(position.y + 1, ROWS - activeShape.length);
+          break;
+        case "ArrowUp":
+          break;
       }
+      if (!checkCollision(newX, newY, activeShape)) {
+        setPosition({ x: newX, y: newY });
+      }
+    };
+
+    const checkCollision = (x, y, shape) => {
+      for (let i = 0; i < shape.length; i++) {
+        for (let j = 0; j < shape[i].length; j++) {
+          if (shape[i][j] && (grid[y + i] && grid[y + i][x + j]) !== 0) {
+            return true;
+          }
+        }
+      }
+      return false;
     };
 
     window.addEventListener("keydown", handleKeyDown);
